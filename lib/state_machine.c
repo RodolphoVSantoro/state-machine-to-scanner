@@ -254,6 +254,7 @@ StateMachine *cria_maquina_de_estado_por_arquivo(const char fname[], uint *n_est
     *n_estados = numero_estados(arquivo_automato);
 
     StateMachine *state_machine = (StateMachine *)malloc(sizeof(StateMachine) * (*n_estados + 1));
+
     if (state_machine == NULL) {
         return NULL;
     }

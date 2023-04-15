@@ -18,14 +18,14 @@ void salva_token(int* estado_anterior, int* estado_atual, char* buffer, FILE* re
 }
 
 int main() {
-    const char* program_file_name = "prolog_program.txt";
+    const char* program_file_name = "./data/prolog_program.txt";
     FILE* programa = fopen(program_file_name, "r");
     if (programa == NULL) {
         printf("Erro ao abrir o arquivo %s", program_file_name);
         return -1;
     }
 
-    const char* automato_file_name = "prolog_automato.txt";
+    const char* automato_file_name = "./data/prolog_automato.txt";
     StateMachine* automato_prolog = create_state_machine_from_file(automato_file_name);
     if (automato_prolog == NULL) {
         printf("Erro alocando memoria para maquina de estados");
@@ -35,7 +35,8 @@ int main() {
     int linha_atual = 1;
     int posicao_na_linha_atual = 1;
     Bool erro_lexico = False;
-    FILE* resultado_tokens = fopen("resultado_tokens.txt", "w");
+    const char* result_tokens_file = "./data/resultado_tokens.txt";
+    FILE* resultado_tokens = fopen(result_tokens_file, "w");
 
     char buffer[BUFFER_SIZE];
     int pos_buffer = 0;

@@ -17,7 +17,7 @@ void print_token_from_string(StateMachine *states, char *string) {
 
 int main() {
     uint n_states;
-    StateMachine *prolog_scanner_automata = cria_maquina_de_estado_por_arquivo("prologAutomaton.txt", &n_states);
+    StateMachine *prolog_scanner_automata = cria_maquina_de_estado_por_arquivo("./data/prologAutomaton.txt", &n_states);
     if (prolog_scanner_automata == NULL) {
         printf("Erro alocando memoria para maquina de estados");
         return -1;
