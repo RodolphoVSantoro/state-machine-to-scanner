@@ -1,0 +1,28 @@
+) 2
+( 3
+, 4
+? 5
+. 7
+mai 9
+min 10
+num 11
+end t start
+end t open_parentheses
+end t close_parentheses
+end t comma
+- 6
+end f question_mark
+end t question_dash
+- 8
+end t dot
+end t dot_dash
+mai 9
+min 9
+num 9
+end t atom
+mai 10
+min 10
+num 10
+end t variable
+num 11
+end t numeral

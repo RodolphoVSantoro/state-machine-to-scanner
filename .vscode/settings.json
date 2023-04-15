@@ -1,0 +1,18 @@
+{
+    "cSpell.words": [
+        "arbitrario",
+        "indice",
+        "lexico",
+        "Maiuscula",
+        "posicao",
+        "printerr",
+        "printerrf",
+        "simbolos",
+        "transicao",
+        "transicoes"
+    ],
+    "files.associations": {
+        "types.h": "c",
+        "string.h": "c"
+    }
+}
