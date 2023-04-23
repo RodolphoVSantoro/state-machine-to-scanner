@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 #include "error_log.h"
-#include "my_string.h"
 #include "state_machine.h"
 #include "types.h"
 #include "vecs.h"

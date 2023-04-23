@@ -1,7 +1,7 @@
 #ifndef VECS_H
 #define VECS_H
 
-#include "state_machine.h"
+#include "types.h"
 
 StringVec *StringVec_create();
 void StringVec_push(StringVec *vec, char *str);

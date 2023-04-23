@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "error_log.h"
+#include "state_machine.h"
 
 /**
  *

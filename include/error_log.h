@@ -1,7 +1,9 @@
 #ifndef ERROR_H
 #define ERROR_H
+
 #include <stdarg.h>
 #include <stdio.h>
+
 static void printerrf(char *format, ...) {
     printf("Logged error to ./error.log\n");
     va_list args;

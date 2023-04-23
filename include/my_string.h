@@ -2,7 +2,6 @@
 #define MY_STRING_H
 
 #include "types.h"
-#include "vecs.h"
 
 Bool strings_iguais(char *string1, char *string2);
 StringVec *split(char *string, char separador);
