@@ -1,9 +1,9 @@
 CC=gcc
 
-ExecPath=./bin/main
-TestExecPath=./bin/test
+ExecPath=./bin/main.exe
+TestExecPath=./bin/test.exe
 
-StaticLibs=./lib/state_machine.c ./lib/my_string.c
+StaticLibs=./lib/state_machine.c ./lib/my_string.c ./lib/vecs.c
 
 Src=./src/main.c $(StaticLibs)
 TestSrc=./src/testes.c $(StaticLibs)
@@ -17,7 +17,7 @@ build:
 
 test:
 	$(CC) -o $(TestExecPath) $(Warning) $(Include) $(StdC) $(TestSrc)
-	./bin/test
+	$(TestExecPath)
 
 run:
-	./bin/main
+	$(ExecPath)
