@@ -2,10 +2,18 @@
 #define MY_STRING_H
 
 #include "types.h"
+#include "vecs.h"
 
 Bool strings_iguais(char *string1, char *string2);
-char **split(char *string, char separador);
-uint len_strings(char **strings);
-void libera_strings(char **strings);
+StringVec *split(char *string, char separador);
+char *new_string_from(char *str);
+
+/*Filas de Char*/
+
+CharQueue *fila_char_cria();
+Bool fila_char_vazia(CharQueue *fila);
+void fila_char_insert(CharQueue *fila, char c);
+char fila_char_remove(CharQueue *fila);
+void fila_char_libera(CharQueue *fila);
 
 #endif
