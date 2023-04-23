@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "error_log.h"
 #include "vecs.h"
 
 Bool strings_iguais(char *string1, char *string2) {
@@ -83,7 +84,7 @@ void fila_char_insert(CharQueue *fila, char c) {
 char fila_char_remove(CharQueue *fila) {
     CharNode *old = fila->first;
     if (old == NULL) {
-        printf("Tentou dar remove em uma fila vazia\n");
+        printerrf("Tentou dar remove em uma fila vazia\n");
         exit(1);
     }
     fila->first = old->next;
