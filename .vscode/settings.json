@@ -1,18 +1,20 @@
 {
-    "cSpell.words": [
-        "arbitrario",
-        "indice",
-        "lexico",
-        "Maiuscula",
-        "posicao",
-        "printerr",
-        "printerrf",
-        "simbolos",
-        "transicao",
-        "transicoes"
-    ],
-    "files.associations": {
-        "types.h": "c",
-        "string.h": "c"
-    }
+  "cSpell.words": [
+    "arbitrario",
+    "indice",
+    "lexico",
+    "Maiuscula",
+    "posicao",
+    "printerr",
+    "printerrf",
+    "simbolos",
+    "transicao",
+    "transicoes"
+  ],
+  "files.associations": {
+    "types.h": "c",
+    "string.h": "c",
+    "my_string.h": "c",
+    "vecs.h": "c"
+  }
 }

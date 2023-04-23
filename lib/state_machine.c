@@ -1,27 +1,22 @@
 #include "state_machine.h"
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "error_log.h"
 #include "my_string.h"
 #include "types.h"
+#include "vecs.h"
 
-static void printerrf(char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    vfprintf(stderr, format, args);
-    va_end(args);
-}
-
-void print_non_zero_transitions(StateMachine states[], uint numero_estados) {
-    uint i = 0;
+void print_non_zero_transitions(StateVec *states, int numero_estados) {
+    int i = 0;
     for (i = 0; i < numero_estados; i++) {
-        uint zero_transition_states = N_UCHAR;
-        for (uint j = 0; j < N_UCHAR; j++) {
-            if (states[i].transitions_into[j] != 0) {
+        int zero_transition_states = N_UCHAR;
+        for (int j = 0; j < N_UCHAR; j++) {
+            StateMachine state = StateVec_get(states, i);
+            if (state.transitions_into[j] != 0) {
                 zero_transition_states--;
-                printf("f(%d, '%c') = %d\n", i, j, states[i].transitions_into[j]);
+                printf("f(%d, '%c') = %d\n", i, j, state.transitions_into[j]);
             }
         }
         if (zero_transition_states != 0) {
@@ -30,25 +25,18 @@ void print_non_zero_transitions(StateMachine states[], uint numero_estados) {
     }
 }
 
-void print_token(StateMachine *states, uint current_state) {
-    if (states[current_state].token_name == NULL) {
+void print_token(StateVec *states, int current_state) {
+    StateMachine state = StateVec_get(states, current_state);
+    if (state.token_name == NULL) {
         printf("Invalid Token\n");
     } else {
-        printf("Token: \"%s\"\n", states[current_state].token_name);
+        printf("Token: \"%s\"\n", state.token_name);
     }
 }
 
-uint get_transition(StateMachine states[], uint current_state, uchar symbol) {
-    return states[current_state].transitions_into[symbol];
-}
-
-void StateMachine_libera(StateMachine *states, uint n_states) {
-    for (uint i = 0; i < n_states; i++) {
-        if (states[i].isFinal) {
-            free(states[i].token_name);
-        }
-    }
-    free(states);
+int get_transition(StateVec *states, int current_state, uchar symbol) {
+    StateMachine state = StateVec_get(states, current_state);
+    return state.transitions_into[symbol];
 }
 
 StateMachine cria_estado(Transition transitions[], int transitions_amount, int default_transition, Bool isFinal, char *token_name) {
@@ -74,77 +62,45 @@ Transition cria_transicao(uchar symbol, int into) {
     return transition;
 }
 
-// TODO: fila de char para ter linhas de tamanho arbitrario
-char *le_linha(FILE *file) {
-    int i = 0;
-    char c = 0;
-    char *linha = malloc(200 * sizeof(char));
-    do {
+CharVec *le_automato(FILE *file) {
+    CharVec *vec = CharVec_create();
+    char c = fgetc(file);
+    while (c != EOF) {
+        CharVec_push(vec, c);
         c = fgetc(file);
-        if (c == EOF || c == '\n') {
-            break;
-        }
-        if (i >= 200) {
-            printerrf("Linha %d muito grande", i);
-            exit(1);
-        }
-        linha[i] = c;
-        i++;
-    } while (True);
-    linha[i] = 0;
-    return linha;
+    }
+    return vec;
 }
 
-uint numero_linhas(FILE *f) {
-    uint linhas = 0;
-    do {
-        char c = fgetc(f);
-        if (c == '\n') {
-            linhas++;
-        }
-    } while (!feof(f));
-    fseek(f, 0, SEEK_SET);
-    return linhas;
+StateMachine StateMachine_default() {
+    StateMachine state;
+    state.token_name = NULL;
+    state.isFinal = False;
+    for (int i = 0; i < N_UCHAR; i++) {
+        state.transitions_into[i] = 0;
+    }
+    return state;
 }
 
-uint numero_estados(FILE *arquivo) {
-    uint estados = 0;
-    Bool start, e, n, d;
-    start = e = n = d = False;
-    do {
-        char c = fgetc(arquivo);
-        if (c == '\n') {
-            start = True;
-            e = n = d = False;
-        } else if (start && c == 'e') {
-            e = True;
-            n = d = False;
-        } else if (start && e && c == 'n') {
-            n = True;
-            d = False;
-        } else if (start && e && n && c == 'd') {
-            start = e = n = d = False;
-            estados++;
-        } else {
-            start = e = n = d = False;
-        }
-    } while (!feof(arquivo));
-    fseek(arquivo, 0, SEEK_SET);
-    return estados;
-}
-
-void erro_lendo_maquina_estado(int linha, int numero_palavras, char **palavras) {
+void erro_lendo_maquina_estado(int linha, int numero_palavras, StringVec *palavras) {
     printerrf("Erro lendo automato, linha %d\n", linha);
+    if (numero_palavras == 0) {
+        printerrf("Esperava 2 identificadores, ou fim de linha, ou fim de arquivo\nLeu nenhuma palavras\n");
+        exit(1);
+    }
     printerrf("Esperava 2 identificadores, ou fim de linha, ou fim de arquivo\nLeu %d palavras\nPalavras:\n", numero_palavras);
     int j = 0;
+    char *palavra = NULL;
     for (j = 0; j < numero_palavras - 1; j++) {
-        printerrf("%s, ", palavras[j]);
+        palavra = StringVec_get(palavras, j);
+        printerrf("%s, ", palavra);
     }
-    printerrf("%s\n", palavras[j]);
+    palavra = StringVec_get(palavras, j);
+    printerrf("%s\n", palavra);
     exit(1);
 }
 
-void erro_lendo_maquina_estado_final_flag(int linha, int numero_palavras, char **palavras) {
+void erro_lendo_maquina_estado_final_flag(int linha, int numero_palavras, StringVec *palavras) {
     printerrf("Erro lendo automato, linha %d\n", linha);
     if (numero_palavras >= 2) {
         printerrf("Esperava identificador do tipo f ou t, leu %s\n", palavras[1]);
@@ -154,9 +110,9 @@ void erro_lendo_maquina_estado_final_flag(int linha, int numero_palavras, char *
     exit(1);
 }
 
-void erro_lendo_maquina_estado_token_faltando(uint linha, char **palavras) {
+void erro_lendo_maquina_estado_token_faltando(int linha, StringVec *palavras) {
     printerrf("Erro lendo automato, linha %d\n", linha);
-    printerrf("Esperava nome de token apos identificador %s\n", palavras[1]);
+    printerrf("Esperava nome de token apos identificador %s\n", StringVec_get(palavras, 0));
     exit(1);
 }
 
@@ -180,26 +136,29 @@ void adiciona_transicoes_simbolos_sequenciais(Transition **transitions, int tran
 }
 
 // sempre chamado com 2 palavras
-Transition **cria_transicoes_de_palavras(char **palavras) {
+Transition **cria_transicoes_de_palavras(StringVec *palavras) {
     Transition **transitions;
 
-    int transition_into = atoi(palavras[1]);
+    char *transition_into_str = StringVec_get(palavras, 1);
+    int transition_into = atoi(transition_into_str);
 
-    if (strings_iguais(palavras[0], "num")) {
+    char *expression = StringVec_get(palavras, 0);
+
+    if (strings_iguais(expression, "num")) {
         int total_transitions = '9' - '0' + 1;
         transitions = (Transition **)malloc(sizeof(Transition *) * (total_transitions + 1));
         adiciona_transicoes_simbolos_sequenciais(transitions, transition_into, total_transitions, '9');
         return transitions;
     }
 
-    if (strings_iguais(palavras[0], "min")) {
+    if (strings_iguais(expression, "min")) {
         int total_transitions = 'z' - 'a' + 1;
         transitions = (Transition **)malloc(sizeof(Transition *) * (total_transitions + 1));
         adiciona_transicoes_simbolos_sequenciais(transitions, transition_into, total_transitions, 'z');
         return transitions;
     }
 
-    if (strings_iguais(palavras[0], "mai")) {
+    if (strings_iguais(expression, "mai")) {
         int total_transitions = ('Z' - 'A' + 1);
         transitions = (Transition **)malloc(sizeof(Transition *) * (total_transitions + 1));
         adiciona_transicoes_simbolos_sequenciais(transitions, transition_into, total_transitions, 'Z');
@@ -209,14 +168,14 @@ Transition **cria_transicoes_de_palavras(char **palavras) {
     // caso nenhum dos anteriores, é um simbolo de 1 caractere
     transitions = (Transition **)malloc(sizeof(Transition *) * 2);
     transitions[0] = (Transition *)malloc(sizeof(Transition));
-    *(transitions[0]) = cria_transicao(palavras[0][0], transition_into);
+    *(transitions[0]) = cria_transicao(expression[0], transition_into);
     transitions[1] = NULL;
 
     return transitions;
 }
 
-void copia_transicoes(Transition **transitions, Transition *transicoes, uint *indice_transicoes) {
-    uint j = 0;
+void copia_transicoes(Transition **transitions, Transition *transicoes, int *indice_transicoes) {
+    int j = 0;
     while (transitions[j] != NULL) {
         transicoes[*indice_transicoes] = *(transitions[j]);
         j++;
@@ -224,70 +183,72 @@ void copia_transicoes(Transition **transitions, Transition *transicoes, uint *in
     }
 }
 
-void adiciona_estado(StateMachine *state_machine, uint *state_index, Transition *transicoes, char **palavras, uint numero_palavras, uint *indice_transicoes, uint linha) {
-    Bool is_final;
+void adiciona_estado(StateVec *state_machine_vec, Transition *transicoes, StringVec *palavras, int *indice_transicoes, int linha) {
+    Bool is_final = False;
     char *token_name = NULL;
-    if (palavras[1][0] == 'f' && palavras[1][1] == 0) {
+    int numero_palavras = StringVec_len(palavras);
+    char *is_final_str = StringVec_get(palavras, 1);
+
+    if (is_final_str[0] == 'f' && is_final_str[1] == 0) {
         is_final = False;
-    } else if (palavras[1][0] == 't' && palavras[1][1] == 0) {
+    } else if (is_final_str[0] == 't' && is_final_str[1] == 0) {
         is_final = True;
         if (numero_palavras == 3) {
-            token_name = palavras[2];
+            token_name = new_string_from(StringVec_get(palavras, 2));
         } else {
             erro_lendo_maquina_estado_token_faltando(linha, palavras);
         }
     } else {
         erro_lendo_maquina_estado_final_flag(linha, numero_palavras, palavras);
     }
-    state_machine[*state_index] = cria_estado(transicoes, *indice_transicoes, 0, is_final, token_name);
-    (*state_index)++;
+    StateMachine novo_estado = cria_estado(transicoes, *indice_transicoes, 0, is_final, token_name);
+    *indice_transicoes = *indice_transicoes + 1;
+    StateVec_push(state_machine_vec, novo_estado);
 }
 
-StateMachine *cria_maquina_de_estado_por_arquivo(const char fname[], uint *n_estados) {
+StateVec *cria_maquina_de_estado_por_arquivo(const char fname[]) {
     FILE *arquivo_automato = fopen(fname, "r");
     if (arquivo_automato == NULL) {
         printerrf("Erro ao ler o arquivo %s", fname);
         exit(1);
     }
+    CharVec *automato_char_vec = le_automato(arquivo_automato);
+    fclose(arquivo_automato);
+    char *automato_str = CharVec_to_string(automato_char_vec);
+    free(automato_char_vec);
 
-    uint linhas = numero_linhas(arquivo_automato);
-    *n_estados = numero_estados(arquivo_automato);
-
-    StateMachine *state_machine = (StateMachine *)malloc(sizeof(StateMachine) * (*n_estados + 1));
-
-    if (state_machine == NULL) {
-        return NULL;
-    }
-    // estado morto
-    state_machine[0] = cria_estado(NULL, 0, 0, False, NULL);
-    uint state_index = 1;
+    StateVec *state_machine_vec = StateVec_create();
+    StateVec_push(state_machine_vec, StateMachine_default());
 
     Transition transicoes[256];
-    uint indice_transicoes = 0;
+    int indice_transicoes = 0;
 
-    for (uint n_linha = 0; n_linha < linhas; n_linha++) {
-        char *linha = le_linha(arquivo_automato);
-        char **palavras = split(linha, ' ');
-        uint numero_palavras = len_strings(palavras);
+    StringVec *linhas = split(automato_str, '\n');
+    int n_linhas = StringVec_len(linhas);
+    for (int n_linha = 0; n_linha < n_linhas; n_linha++) {
+        char *linha = StringVec_get(linhas, n_linha);
 
-        Bool linha_invalida = numero_palavras != 2 && numero_palavras != 3 && (numero_palavras != 1 || palavras[0][0] != '\n');
+        StringVec *palavras = split(linha, ' ');
+
+        int numero_palavras = StringVec_len(palavras);
+        Bool linha_invalida = numero_palavras < 1 || numero_palavras > 3;
         if (linha_invalida) {
             erro_lendo_maquina_estado(n_linha, numero_palavras, palavras);
         }
 
-        if (strings_iguais(palavras[0], "end")) {
-            adiciona_estado(state_machine, &state_index, transicoes, palavras, numero_palavras, &indice_transicoes, n_linha);
+        if (strings_iguais(StringVec_get(palavras, 0), "end")) {
+            adiciona_estado(state_machine_vec, transicoes, palavras, &indice_transicoes, n_linha);
             indice_transicoes = 0;
         } else {
             Transition **transitions = cria_transicoes_de_palavras(palavras);
             copia_transicoes(transitions, transicoes, &indice_transicoes);
             libera_transition_2d(transitions);
+            transitions = NULL;
         }
 
-        free(linha);
-        libera_strings(palavras);
+        StringVec_free(&palavras);
     }
+    StringVec_free(&linhas);
 
-    fclose(arquivo_automato);
-    return state_machine;
+    return state_machine_vec;
 }
