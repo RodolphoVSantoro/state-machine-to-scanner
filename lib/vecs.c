@@ -4,7 +4,9 @@
 #include <stdlib.h>
 
 #include "error_log.h"
+#include "my_string.h"
 #include "state_machine.h"
+#include "types.h"
 
 /**
  *
@@ -75,6 +77,15 @@ void StringVec_free(StringVec **vec) {
     *vec = NULL;
 }
 
+Bool StringVec_contains(StringVec *vec, char *str) {
+    for (int i = 0; i < vec->size; i++) {
+        if (strings_iguais(vec->data[i], str)) {
+            return True;
+        }
+    }
+    return False;
+}
+
 /**
  *
  * Char Vec
@@ -141,7 +152,6 @@ void CharVec_resize(CharVec *vec, int capacity) {
 
 void CharVec_reset(CharVec *vec) {
     vec->size = 0;
-    vec->capacity = 1;
 }
 
 void CharVec_set(CharVec *vec, int index, char c) {
@@ -176,9 +186,36 @@ char *CharVec_to_string(CharVec *vec) {
     return string;
 }
 
+Bool CharVec_contains(CharVec *vec, char c) {
+    for (int i = 0; i < vec->size; i++) {
+        if (vec->data[i] == c) {
+            return True;
+        }
+    }
+    return False;
+}
+
+CharVec *CharVec_copy_slice(CharVec *vec, int start, int end) {
+    if (start < 0 || start > vec->size || end < 0 || end > vec->size || start > end) {
+        printerrf("Error slicing char vec for range %d:%d\n", start, end);
+        exit(1);
+    }
+    CharVec *slice = CharVec_create();
+    for (int i = start; i < end; i++) {
+        CharVec_push(slice, vec->data[i]);
+    }
+    return slice;
+}
+
+void CharVec_merge(CharVec *destino, CharVec *fonte) {
+    for (int i = 0; i < fonte->size; i++) {
+        CharVec_push(destino, fonte->data[i]);
+    }
+}
+
 /**
  *
- * State macnine vec
+ * State machine vec
  *
  */
 

@@ -1,0 +1,15 @@
+Estado atual: 10, Estado Anterior: 10, Token: tteste
+Estado atual: 1, Estado Anterior: 1, Token: 
+Estado atual: 10, Estado Anterior: 10, Token: cidade
+Estado atual: 1, Estado Anterior: 1, Token: 
+Estado atual: 11, Estado Anterior: 11, Token: 234
+Estado atual: 1, Estado Anterior: 1, Token: 
+Estado atual: 10, Estado Anterior: 10, Token: olho
+Estado atual: 1, Estado Anterior: 1, Token: 
+Estado atual: 11, Estado Anterior: 11, Token: 123
+Estado atual: 1, Estado Anterior: 1, Token: ,
+Estado atual: 1, Estado Anterior: 1, Token: 
+Estado atual: 1, Estado Anterior: 11, Token: 23
+Estado atual: 1, Estado Anterior: 1, Token: ?
+Estado atual: 1, Estado Anterior: 1, Token: 
+Estado atual: 1, Estado Anterior: 1, Token: a

@@ -1,21 +1,11 @@
-#define BUFFER_SIZE (1024 * 1024)
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "my_string.h"
+#include "scanner_generator.h"
 #include "state_machine.h"
 #include "types.h"
-
-void computa_token(int* estado_anterior, int* estado_atual, char* buffer, FILE* resultado_tokens) {
-    if (*estado_atual != 1) {
-        salva_token(estado_anterior, estado_atual, buffer, resultado_tokens);
-    }
-    *estado_atual = 1;
-    *estado_anterior = 1;
-}
-
-void salva_token(int* estado_anterior, int* estado_atual, char* buffer, FILE* resultado_tokens) {
-    fprintf(resultado_tokens, "Estado atual: %d, Estado Anterior: %d, Token: %s", estado_anterior, estado_atual, buffer);
-}
+#include "vecs.h"
 
 int main() {
     const char* program_file_name = "./data/prolog_program.txt";
@@ -25,57 +15,95 @@ int main() {
         return -1;
     }
 
-    const char* automato_file_name = "./data/prolog_automato.txt";
-    StateMachine* automato_prolog = create_state_machine_from_file(automato_file_name);
+    const char* automato_file_name = "./data/prolog_automaton.txt";
+    StateVec* automato_prolog = cria_maquina_de_estado_por_arquivo(automato_file_name);
     if (automato_prolog == NULL) {
         printf("Erro alocando memoria para maquina de estados");
         return -1;
     }
 
+    const char* delimiters_file_name = "./data/prolog_delimiters.txt";
+    CharVec* delimiters = read_delimiter_list(delimiters_file_name);
+
     int linha_atual = 1;
     int posicao_na_linha_atual = 1;
-    Bool erro_lexico = False;
-    const char* result_tokens_file = "./data/resultado_tokens.txt";
-    FILE* resultado_tokens = fopen(result_tokens_file, "w");
 
-    char buffer[BUFFER_SIZE];
-    int pos_buffer = 0;
+    const char* result_tokens_file_name = "./data/resultado_tokens.txt";
+    FILE* result_token_file = fopen(result_tokens_file_name, "w");
+
+    CharVec* token_read_vec = CharVec_create();
+    CharVec* confirmed_token_vec = CharVec_create();
 
     int estado_atual = 1;
     int estado_anterior = 1;
 
-    do {
-        char c = fgetc(programa);
-        if (c == EOF) {
-            break;
-        }
-
-        if (c == ' ' || c == '\n' || c == '\t') {
-            buffer[pos_buffer] = 0;
-            computa_token(&estado_anterior, &estado_atual, buffer, resultado_tokens);
-
-            posicao_na_linha_atual++;
-            if (c == '\n') {
-                linha_atual++;
-            }
-
-            pos_buffer = 0;
-            continue;
-        }
-
-        buffer[pos_buffer] = c;
-        pos_buffer++;
-        estado_anterior = estado_atual;
-
-        estado_atual = get_transition(automato_prolog, estado_atual, c);
-    } while (True);
-
-    fclose(resultado_tokens);
-    fclose(programa);
-    free(automato_prolog);
-    if (erro_lexico) {
-        buffer[pos_buffer] = 0;
-        printf("Erro léxico na linha %d, posicao %d, lendo o token '%s'\n", linha_atual, posicao_na_linha_atual, buffer);
+    char caracter_atual = fgetc(programa);
+    CharVec_push(token_read_vec, caracter_atual);
+    char caracter_proximo = EOF;
+    if (caracter_atual != EOF) {
+        caracter_proximo = fgetc(programa);
     }
+    while (caracter_proximo != EOF) {
+        StateMachine current_node = StateVec_get(automato_prolog, estado_atual);
+
+        // TODO: rever posicao dessa logica
+        Bool is_character_delimiter = CharVec_contains(delimiters, caracter_atual);
+        if (!is_character_delimiter) {
+            // printf("Lendo caracter: '%c'\n", caracter_atual);
+            CharVec_push(token_read_vec, caracter_atual);
+        }
+
+        // TODO: rever onde colocar essa logica
+        if (current_node.isFinal) {
+            CharVec_merge(confirmed_token_vec, token_read_vec);
+            CharVec_reset(token_read_vec);
+        }
+
+        if (token_complete(automato_prolog, estado_atual, caracter_proximo, is_character_delimiter)) {
+            Bool erro_lexico = tem_erro_lexico(estado_atual, current_node.isFinal);
+            if (erro_lexico) {
+                throw_lexical_error(confirmed_token_vec, token_read_vec, linha_atual, posicao_na_linha_atual);
+            }
+            // char* buffer = CharVec_to_string(confirmed_token_vec);
+            // printf("Token lido: %s\n", buffer);
+            // free(buffer);
+            // printf("Salvando: estado atual: %d, estado final: %d, caracter atual: '%c', caracter proximo: '%c'\n", estado_atual, current_node.isFinal, caracter_atual, caracter_proximo);
+            salva_token(result_token_file, estado_anterior, estado_atual, confirmed_token_vec);
+            estado_atual = 1;
+            estado_anterior = 1;
+            CharVec_reset(confirmed_token_vec);
+        } else {
+            estado_anterior = estado_atual;
+            estado_atual = get_transition(automato_prolog, estado_atual, caracter_atual);
+        }
+
+        // cursores de posicao para o indicar onde ocorre erro lexico
+        posicao_na_linha_atual++;
+        if (caracter_atual == '\n') {
+            linha_atual++;
+            posicao_na_linha_atual = 1;
+        }
+
+        caracter_atual = caracter_proximo;
+        caracter_proximo = fgetc(programa);
+    }
+    StateMachine current_node = StateVec_get(automato_prolog, estado_anterior);
+    if (CharVec_len(confirmed_token_vec) > 0) {
+        if (current_node.isFinal) {
+            salva_token(result_token_file, estado_anterior, estado_atual, confirmed_token_vec);
+        } else {
+            throw_lexical_error(confirmed_token_vec, token_read_vec, linha_atual, posicao_na_linha_atual);
+        }
+    }
+
+    fclose(programa);
+    fclose(result_token_file);
+
+    free(automato_prolog);
+    CharVec_free(&delimiters);
+    CharVec_free(&token_read_vec);
+    CharVec_free(&confirmed_token_vec);
+
+    printf("Tokens lidos com sucesso!\nSalvo em %s\n", result_tokens_file_name);
     return 0;
 }

@@ -3,7 +3,7 @@ CC=gcc
 ExecPath=./bin/main.exe
 TestExecPath=./bin/test.exe
 
-StaticLibs=./lib/state_machine.c ./lib/my_string.c ./lib/vecs.c
+StaticLibs=./lib/state_machine.c ./lib/my_string.c ./lib/vecs.c ./lib/scanner_generator.c
 
 Src=./src/main.c $(StaticLibs)
 TestSrc=./src/testes.c $(StaticLibs)

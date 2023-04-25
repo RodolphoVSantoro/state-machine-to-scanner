@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "error_log.h"
+#include "scanner_generator.h"
 #include "state_machine.h"
 #include "types.h"
 #include "vecs.h"
@@ -17,7 +18,7 @@ void print_token_from_string(StateVec *states, char *string) {
 }
 
 int main() {
-    StateVec *prolog_scanner_automata = cria_maquina_de_estado_por_arquivo("./data/prologAutomaton.txt");
+    StateVec *prolog_scanner_automata = cria_maquina_de_estado_por_arquivo("./data/prolog_automaton.txt");
     if (prolog_scanner_automata == NULL) {
         printerrf("Erro alocando memoria para maquina de estados");
         return -1;
