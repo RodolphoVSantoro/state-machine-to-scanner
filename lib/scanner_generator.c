@@ -6,6 +6,8 @@
 
 #include "error_log.h"
 #include "my_string.h"
+#include "state_machine.h"
+#include "vecs.h"
 
 CharVec* read_delimiter_list(const char* filename) {
     FILE* delimiters_file = fopen(filename, "r");

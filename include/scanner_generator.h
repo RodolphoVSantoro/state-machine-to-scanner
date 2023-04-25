@@ -1,6 +1,8 @@
 #ifndef SCANNER_GENERATOR_H
 #define SCANNER_GENERATOR_H
 
+#include <stdio.h>
+
 #include "vecs.h"
 
 CharVec* read_delimiter_list(const char* filename);
