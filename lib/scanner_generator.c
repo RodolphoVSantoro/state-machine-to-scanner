@@ -52,9 +52,9 @@ CharVec* read_delimiter_list(const char* filename) {
     return delimiters;
 }
 
-void salva_token(FILE* resultado_tokens, int estado_anterior, int estado_atual, CharVec* token_vec) {
+void salva_token(FILE* resultado_tokens, StateMachine current_state, CharVec* token_vec) {
     char* buffer = CharVec_to_string(token_vec);
-    fprintf(resultado_tokens, "Estado atual: %d, Estado Anterior: %d, Token: %s\n", estado_anterior, estado_atual, buffer);
+    fprintf(resultado_tokens, "%s(%s)\n", current_state.token_name, buffer);
     free(buffer);
 }
 
@@ -76,9 +76,9 @@ Bool token_complete(StateVec* automato_prolog, int estado_atual, char caracter_p
     return False;
 }
 
-void throw_lexical_error(CharVec* token_confirmed, CharVec* token_read_vec, int linha_atual, int posicao_na_linha_atual) {
+void throw_lexical_error(CharVec* token_confirmed, CharVec* token_read_vec, char proximo_char, int linha_atual, int posicao_na_linha_atual) {
     CharVec_merge(token_confirmed, token_read_vec);
     char* buffer = CharVec_to_string(token_confirmed);
-    printf("Erro léxico na linha %d, posicao %d, lendo o token '%s'\n", linha_atual, posicao_na_linha_atual, buffer);
+    printerrf("Erro léxico na linha %d, posicao %d, lendo o token '%s' found unexpected '%c'\n", linha_atual, posicao_na_linha_atual, buffer, proximo_char);
     exit(1);
 }

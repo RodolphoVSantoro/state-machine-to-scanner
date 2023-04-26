@@ -1,15 +1,30 @@
-Estado atual: 10, Estado Anterior: 10, Token: tteste
-Estado atual: 1, Estado Anterior: 1, Token: 
-Estado atual: 10, Estado Anterior: 10, Token: cidade
-Estado atual: 1, Estado Anterior: 1, Token: 
-Estado atual: 11, Estado Anterior: 11, Token: 234
-Estado atual: 1, Estado Anterior: 1, Token: 
-Estado atual: 10, Estado Anterior: 10, Token: olho
-Estado atual: 1, Estado Anterior: 1, Token: 
-Estado atual: 11, Estado Anterior: 11, Token: 123
-Estado atual: 1, Estado Anterior: 1, Token: ,
-Estado atual: 1, Estado Anterior: 1, Token: 
-Estado atual: 1, Estado Anterior: 11, Token: 23
-Estado atual: 1, Estado Anterior: 1, Token: ?
-Estado atual: 1, Estado Anterior: 1, Token: 
-Estado atual: 1, Estado Anterior: 1, Token: a
+variable(food)
+variable(burger)
+variable(food)
+variable(sandwich)
+variable(food)
+variable(pizza)
+variable(lunch)
+variable(sandwich)
+variable(dinner)
+variable(pizza)
+variable(meal)
+atom(X)
+dot_dash(.-)
+variable(food)
+atom(X)
+question_dash(?-)
+variable(meal)
+atom(X)
+comma(,)
+variable(dinner)
+atom(X)
+question_dash(?-)
+variable(meal)
+atom(What)
+question_dash(?-)
+variable(meal)
+atom(X)
+comma(,)
+variable(dinner)
+atom(Y)

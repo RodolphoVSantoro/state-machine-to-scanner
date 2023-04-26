@@ -30,7 +30,7 @@ void print_token(StateVec *states, int current_state) {
     if (state.token_name == NULL) {
         printf("Invalid Token\n");
     } else {
-        printf("Token: \"%s\"\n", state.token_name);
+        printf("\"%s\"\n", state.token_name);
     }
 }
 

@@ -1,17 +1,17 @@
-) 2
-( 3
+( 2
+) 3
 , 4
 ? 5
 . 7
 mai 9
 min 10
 num 11
-end t start
+end f
 end t open_parentheses
 end t close_parentheses
 end t comma
 - 6
-end f question_mark
+end f
 end t question_dash
 - 8
 end t dot
